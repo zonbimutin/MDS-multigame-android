@@ -9,4 +9,5 @@
     <string name="create_player_player">Joueur</string>
     <string name="create_player_validate">Valider</string>
     <string name="location_lat_lng">Lat : %.2f Lon : %.2f</string>
+    <string name="display_players_title">Player list</string>
 </resources>

@@ -15,6 +15,8 @@ import com.example.mds_multigame.R;
 import com.example.mds_multigame.dao.AppDatabase;
 import com.example.mds_multigame.databinding.ActivityCreatePlayerBinding;
 import com.example.mds_multigame.model.Player;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.squareup.picasso.Picasso;
 
 import androidx.annotation.NonNull;
@@ -98,20 +100,21 @@ public class CreatePlayerActivity extends AppCompatActivity {
         }
     }
     private void getUserLocation() {
-        LocationManager locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
-                != PackageManager.PERMISSION_GRANTED &&
-                ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
+                this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             return;
         }
-        Location location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-        if (location !=null){
-            binding.createPlayerLocalisation.setText(getString(R.string.location_lat_lng,
-                    location.getLatitude(), location.getLongitude()));
-        } else {
-            binding.createPlayerLocalisation.setText("loc par defaut");
-        }
-
+        LocationServices.getFusedLocationProviderClient(this).getLastLocation()
+                .addOnSuccessListener(this, new OnSuccessListener<Location>() {
+                    @Override
+                    public void onSuccess(Location location) {
+                        if (location != null) {
+                            binding.createPlayerLocalisation.setText(getString(R.string.location_lat_lng,
+                                    location.getLatitude(), location.getLongitude()));
+                        }
+                    }
+                });
     }
     private boolean checkLocationAuthorized() {
         return ActivityCompat.checkSelfPermission(CreatePlayerActivity.this,
