@@ -1,3 +1,12 @@
 <resources>
-    <string name="app_name">MDS-multigame</string>
+    <string name="app_name">MultiGame</string>
+    <string name="splash_title">Splash</string>
+    <string name="create_player_title">Bonjour !</string>
+    <string name="create_player_name">Nom</string>
+    <string name="create_player_firstname">Prénom</string>
+    <string name="create_player_age">Age</string>
+    <string name="create_player_localisation">Localisation</string>
+    <string name="create_player_player">Joueur</string>
+    <string name="create_player_validate">Valider</string>
+    <string name="location_lat_lng">Lat : %.2f Lon : %.2f</string>
 </resources>

@@ -1,10 +1,5 @@
 package com.example.mds_multigame.activity;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
-
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -14,16 +9,26 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.view.View;
+import android.widget.Toast;
 
 import com.example.mds_multigame.R;
+import com.example.mds_multigame.dao.AppDatabase;
+import com.example.mds_multigame.databinding.ActivityCreatePlayerBinding;
+import com.example.mds_multigame.model.Player;
 import com.squareup.picasso.Picasso;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.databinding.DataBindingUtil;
 
 
 public class CreatePlayerActivity extends AppCompatActivity {
-
     private static final int REQUEST_IMAGE = 7;
     private static final int REQUEST_LOCALISATION_PERMISSION = 2001;
     private ActivityCreatePlayerBinding binding;
+    private String pictureUrl;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -51,6 +56,39 @@ public class CreatePlayerActivity extends AppCompatActivity {
                 }
             }
         });
+        binding.createPlayerValidate.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (!binding.createPlayerName.getText().toString().isEmpty()
+                        && !binding.createPlayerFirstname.getText().toString().isEmpty()
+                        && !binding.createPlayerAge.getText().toString().isEmpty()
+                        && !binding.createPlayerLocalisation.getText().toString().isEmpty()
+                        && pictureUrl != null
+                ){
+                    Player player = new Player(
+                            pictureUrl,
+                            binding.createPlayerName.getText().toString(),
+                            binding.createPlayerFirstname.getText().toString(),
+                            Integer.parseInt(binding.createPlayerAge.getText().toString()),
+                            binding.createPlayerLocalisation.getText().toString()
+                    );
+
+                    AppDatabase.getDatabase(CreatePlayerActivity.this).appDao().insert(player);
+
+                } else {
+                    Toast.makeText(CreatePlayerActivity.this, "information manquantes", Toast.LENGTH_SHORT).show();
+                }
+
+
+                Player player = new Player(
+                        pictureUrl,
+                        binding.createPlayerName.getText().toString(),
+                        binding.createPlayerFirstname.getText().toString(),
+                        Integer.parseInt(binding.createPlayerAge.getText().toString()),
+                        binding.createPlayerLocalisation.getText().toString()
+                );
+            }
+        });
     }
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
@@ -66,26 +104,16 @@ public class CreatePlayerActivity extends AppCompatActivity {
                 ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             return;
         }
-        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0,
-                new LocationListener() {
-                    @Override
-                    public void onLocationChanged(Location location) {
-                        //here you receive the new location
-                        locationManager.removeUpdates(this);
-                    }
+        Location location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+        if (location !=null){
+            binding.createPlayerLocalisation.setText(getString(R.string.location_lat_lng,
+                    location.getLatitude(), location.getLongitude()));
+        } else {
+            binding.createPlayerLocalisation.setText("loc par defaut");
+        }
 
-                    @Override
-                    public void onStatusChanged(String s, int i, Bundle bundle) {
-                    }
-                    @Override
-                    public void onProviderEnabled(String s) {
-                    }
-                    @Override
-                    public void onProviderDisabled(String s) {
-                    }
-                });
     }
-    private boolean checkLocationAuthorized(){
+    private boolean checkLocationAuthorized() {
         return ActivityCompat.checkSelfPermission(CreatePlayerActivity.this,
                 Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED
                 && ActivityCompat.checkSelfPermission(CreatePlayerActivity.this,
@@ -96,6 +124,7 @@ public class CreatePlayerActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_IMAGE && resultCode == RESULT_OK) {
             Picasso.get().load(data.getData()).centerCrop().fit().into(binding.createPlayerImage);
+            pictureUrl = data.getData().toString();
         }
     }
 }
